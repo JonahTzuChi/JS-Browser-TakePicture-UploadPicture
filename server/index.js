@@ -1,5 +1,5 @@
 /*
-    Link: https://www.terlici.com/2015/05/16/uploading-files-locally.html
+    npm     : https://www.npmjs.com/package/multer
 */
 
 var express = require("express");
@@ -23,10 +23,40 @@ var app = express();
 var router = express.Router();
 
 app.set("title", "IMG-SERVER");
-app.use(express.json());
 
-router.post("/images", uploading.single('face'), async (req, res, next) =>{
-    res.status(200).json({message: "done"});
+// Remember to apply the middleware function as the second parameter
+// I set the fieldname as face, but you may set it to anyname that best suit your use case
+router.post("/images", uploading.single('face'), (req, res) =>{
+    // console.log(req.file); // uncomment this section to see the structure of req.file
+    res.status(200).json({message: `uploaded ${req.file.filename}`});
+});
+
+//
+/*
+    I attempt to factor error handling into my code, but failed.
+    I find handling the error very challenging, because I do not know how to generate an error specifically for multer use case.
+    I tried to upload without a file, but it never raise an error. 
+    The workaround I have for now is to identify whether req.file is undefined. 
+    When no file is attached, it is undefined. 
+*/
+var handler = uploading.single('face');
+router.post("/images-error-handling", (req, res)=>{
+    var message;
+    handler(req, res, function (err){
+        if (err instanceof multer.MulterError){
+            res.status(200).json({ message: 'failed, multer error' });
+            return;
+        }
+        if (err) {
+            res.status(200).json({ message: 'failed' });
+            return;
+        }
+        if (req.file == undefined) {
+            res.status(200).json({ message: `upload failed, suspect no file is attached` });
+            return;
+        }
+        res.status(200).json({ message: `uploaded ${req.file.filename}` });
+    });
 });
 
 app.use(router);
