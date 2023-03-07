@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebCam</title>
+    <link rel="stylesheet" href="index.css" />
+    <!--
+        medium  : https://medium.com/swlh/how-to-access-webcam-and-take-picture-with-javascript-b9116a983d78
+        github  : https://github.com/bensonruan/webcam-easy
+        npm     : https://www.npmjs.com/package/webcam-easy
+        This man save me a ton of work so I want to give credit to his work!
+    -->
+    <script type="text/javascript" src="https://unpkg.com/webcam-easy/dist/webcam-easy.min.js"></script>
+    <script src="index.js"></script>
+    <script>
+        let webcam = undefined;
+
+        function init() {
+            const webcamElement = document.getElementById("webcam");
+            const canvasElement = document.getElementById("canvas");
+            //const snapSoundElement = document.getElementById("snapSound");
+            webcam = new Webcam(
+                webcamElement,
+                "user",
+                canvasElement,
+                null
+            ); // leave the last parameters as null because I do not need the sound effect
+        }
+
+        function start() {
+            webcam
+                .start()
+                .then((result) => {
+                    console.log("webcam started");
+                })
+                .catch((err) => {
+                    console.error(err); // was console.log
+                });
+        }
+
+        function snap() {
+            /*
+                One of the site guide me to convert it's type, 
+                But the output of this module is already in string type. 
+                We can check verify this with typeof(image).
+                One of our responsible when we integrate other's work into ours, 
+                is to verify and fix dependencies issue. 
+            */
+            let image = webcam.snap();
+            /*
+                Alright, so we can go ahead and save it to the browser's local storage with the code below. 
+                I still want to recommend the site even though it took a while to figure out I don't need a type conversion. 
+                In fact, many parts of my code is also from this site. 
+                Link: https://www.webmound.com/save-images-localstorage-javascript/#:~:text=Step%201%3A%20Get%20the%20image,setItem()%20method%20in%20JavaScript.
+            */
+            localStorage.setItem("image", image);
+        }
+
+        /*
+            Link: https://www.webmound.com/save-images-localstorage-javascript/#:~:text=Step%201%3A%20Get%20the%20image,setItem()%20method%20in%20JavaScript.
+        */
+        function preview() {
+            const image = localStorage.getItem("image");
+
+            const previewImage = document.getElementById("preview");
+
+            if (image) {
+                previewImage.setAttribute("src", image);
+            } else {
+                previewImage.setAttribute("src", "default.jpg");
+            }
+        }
+
+        function send(){
+            const url = "http://127.0.0.1:3000/images";
+            const image = localStorage.getItem("image");
+            HTTPPostData(url, image, (response)=>{
+                document.getElementById("ajax-response").innerHTML = response;
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Media</h1>
+    <video id="webcam" autoplay playsinline width="640" height="480"></video>
+    <canvas id="canvas" class="d-none"></canvas>
+    <audio id="snapSound" src="" preload="auto"></audio>
+    <hr />
+    <h1>Functions</h1>
+    <input type="button" value="start" onclick="start();" />
+    <input type="button" value="snap" onclick="snap();" />
+    <input type="button" value="preview" onclick="preview();" />
+    <input type="button" value="send" onclick="send();" />
+    <hr />
+    <h1>Preview</h1>
+    <div>
+        <img id="preview" src="default.jpg" alt="thumbnail" height="200" />
+    </div>
+    <p id="ajax-response"></p>
+</body>
+
+</html>
