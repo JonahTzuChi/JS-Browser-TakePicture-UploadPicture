@@ -8,9 +8,6 @@ Ultimately, I would like to take a picture in the browser with external webcam a
 4. Be able to send the captured image to backend - checked
 5. The backend receive the image and save it to local storage - checked
 
-## Future work
-Find out how to handling mutler error
-
 ## So, it work for my machine!
 I adopt libraries developed by others and put some icing and topping to suit my own use case. 
 As stated in the title, it works on my machine and my own use case. I would love to hear that my work actually help you. 
